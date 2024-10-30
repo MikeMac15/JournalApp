@@ -1,84 +1,77 @@
 
 import { useEffect, useState } from 'react';
-import { Text, View, StyleSheet } from 'react-native'
+import { Text, View, StyleSheet, FlatList } from 'react-native';
 import Welcome from '../../components/UI/Home/Welcome';
 import Calendar from '../../components/UI/Home/Calendar';
 import RecentEntries from '../../components/UI/Home/RecentEntries';
 import NewEntryButton from '../../components/UI/Home/NewEntryBtn';
 import NewEntry from '../../components/JournalPages/NewEntry';
+import ViewEntry from '../../components/JournalPages/ViewEntry';
 import { Schema } from '../../amplify/data/resource';
 import { generateClient } from 'aws-amplify/api';
-import ViewEntry from '../../components/JournalPages/ViewEntry';
+import Main from '../../components/JournalPages/Main';
 
+const client = generateClient<Schema>();
 
-const client = generateClient<Schema>()
-interface indexProps {
-    // myJournal:Schema["Journal"]["type"][]
-}
-
-const Home: React.FC<indexProps> = ({ }) => {
-
-    const [showHome,setShowHome] = useState<boolean>(true);
-    const [showView,setShowView] = useState<number>(0);
-    const [date,setDate] = useState<string>('');
-
-
-    const [myJournal,setMyJournal] = useState<Schema["Journal"]["type"][]>([]);
-    const [entryToView, setEntryToView] = useState<Schema["Journal"]["type"] | null>();
+const Home: React.FC = () => {
+    const [showView, setShowView] = useState<number>(0);
+    const [date, setDate] = useState<string>('');
+    const [myJournal, setMyJournal] = useState<Schema["Journal"]["type"][]>([]);
+    const [entryToView, setEntryToView] = useState<Schema["Journal"]["type"] | null>(null);
 
     const fetchJournalEntries = async () => {
-      try {
-        const data = await client.models.Journal.list();
-        console.log(data)
-        if (data) {
-          setMyJournal(data.data);
+        try {
+            const data = await client.models.Journal.list();
+            if (data) setMyJournal(data.data);
+        } catch (error) {
+            console.error("Failed to fetch journal entries:", error);
         }
-      } catch (error) {
-        console.error("Failed to fetch journal entries:", error);
-      }
     };
+
     useEffect(() => {
-      fetchJournalEntries();
-    }, []); 
-    
-    let entryDates = myJournal.map((data)=>(data.date))
-    console.log(entryDates)
+        fetchJournalEntries();
+    }, []);
+    useEffect(() => {
+        fetchJournalEntries();
+    }, []);
 
-    useEffect(()=>{
-        if(!showView){
-            setShowHome(true);
-        }
-    },[showView])
+    const entryDates = myJournal.map((data) => data.date);
 
+    // Define FlatList data structure
+    const flatListData = [
+        { id: 'main', component: <Main setDate={setDate} entryDates={entryDates} setShowView={setShowView} journalEntries={myJournal} setEntryToView={setEntryToView} /> },
 
-
+    ];
 
     return (
-        
+      <View style={{height:'100%'}}>
+      
+        {
+          showView === 0 ? (
 
-        <View style={{margin:20}}>
-
-            {showView == 0
-            ?
-            <>
-            <Welcome />
-            <Calendar setDate={setDate} dates={entryDates}/>
-            <RecentEntries journalEntries={myJournal} setShowView={setShowView}/>
-            <NewEntryButton setView={setShowHome}/>
-            </>
-            :
-            showView == 2
-            ?
-            <>
-                {entryToView ? <ViewEntry myJournalEntry={entryToView} setShowView={setShowView} /> : <Text>No entry selected</Text>}
-            </>
-            :
-                <NewEntry entryDate={date} setShowHome={setShowHome} />
-            
-        }
-        </View>
-        
-    )
-}
+        <FlatList
+            data={flatListData}
+            renderItem={({ item }) => item.component}
+            keyExtractor={(item) => item.id}
+            />
+              ) : showView === 2 ? (
+                entryToView ? <ViewEntry myJournalEntry={entryToView} setShowView={setShowView} /> : <Text>No entry selected</Text>
+              ) : (
+                <NewEntry entryDate={date} setShowView={setShowView} />
+              )
+            }
+            </View>
+    );
+};
 
 export default Home;
+
+const styles = StyleSheet.create({
+    container: {
+        padding: 16,
+    },
+    centered: {
+        flexDirection: 'column',
+        alignItems: 'center',
+    },
+});

@@ -1,0 +1,9 @@
+type Journal @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  summary: String!
+  location: String
+  date: String!
+  message: String
+  tags: [String]
+  pictures: [String]
+}

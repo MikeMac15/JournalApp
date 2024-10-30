@@ -16,10 +16,10 @@ const client = generateClient<Schema>();
 
 interface newEntryProps {
     entryDate: string;
-    setShowHome: React.Dispatch<React.SetStateAction<boolean>>;
+    setShowView: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const NewEntry: React.FC<newEntryProps> = ({ entryDate, setShowHome }) => {
+const NewEntry: React.FC<newEntryProps> = ({ entryDate, setShowView }) => {
 
    
     const [tags,setTags] = useState<string[]>([]);
@@ -64,6 +64,7 @@ const NewEntry: React.FC<newEntryProps> = ({ entryDate, setShowHome }) => {
         console.error("Errors occurred:", errors);
       } else {
         console.log("Journal entry created successfully:", newMessage);
+        setShowView(2);
       }
     } catch (errors) {
       console.error("Error creating journal entry:", errors);
@@ -80,7 +81,7 @@ const NewEntry: React.FC<newEntryProps> = ({ entryDate, setShowHome }) => {
         <TagInput tags={tags} setTags={setTags}/>
         <PictureSelector setPhotoURLs={setPhotoUrls} photoURLs={photoUrls} />
         <Button onPress={createJournalEntry} title="Add new journal entry"/>
-        <Button onPress={() => setShowHome(true)} title="Discard new entry"/>
+        <Button onPress={() => setShowView(0)} title="Discard new entry"/>
         
       </ScrollView>
     );

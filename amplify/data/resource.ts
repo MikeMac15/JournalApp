@@ -9,6 +9,7 @@ and "delete" any "Todo" records.
 const schema = a.schema({
   Journal: a.model({
       date: a.string().required(),
+      location: a.string(),
       message: a.string(),
       summary: a.string(),
       tags: a.string().array(),

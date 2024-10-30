@@ -4,10 +4,12 @@ import { extraStyles, recentsPage, textStyles } from '../../../Styles/Styles';
 import { Schema } from '../../../amplify/data/resource';
 import { Nullable } from '@aws-amplify/data-schema';
 import { router } from 'expo-router';
+// import defaultImage from '../../../assets/default.jpg';
 
 interface RecentEntriesProps {
     journalEntries: data;
     setShowView: React.Dispatch<React.SetStateAction<number>>;
+    setEntryToView: React.Dispatch<React.SetStateAction<Schema["Journal"]["type"] | null>>;
 }
 type data = {
     date: string;
@@ -20,33 +22,39 @@ type data = {
     readonly updatedAt: string;
 }[];
 
-const RecentEntries: React.FC<RecentEntriesProps> = ({ journalEntries, setShowView }) => {
+const RecentEntries: React.FC<RecentEntriesProps> = ({ journalEntries, setShowView, setEntryToView }) => {
     // Format the date as "MM-DD"
     const formatDate = (date: string) => date.slice(5).replace(/^0/, '');
-
+    // journalEntries.reverse();
     // Single Recent Entry Component
     const RecentBox: React.FC<{ entry: data[0] }> = ({ entry }) => (
-        <View style={styles.centered}>
             <TouchableOpacity
-                style={[recentsPage.box, extraStyles.shadow]}
+            style={[ extraStyles.lightshadow2, recentsPage.fullbox]}
                 onPress={() => {
+                    setEntryToView(entry);
                     setShowView(2);
                 }}
             >
-                {entry.pictures && entry.pictures[0] ? (
-                    <Image source={{ uri: entry.pictures[0] }} style={extraStyles.image} />
-                ) : (
-                    <MaterialIcons name="photo" size={30} color="#777" />
-                )}
-            </TouchableOpacity>
+        <View style={[]}>
+                {entry.pictures && <RecentImage image={entry.pictures[0]} />}
             <Text>{formatDate(entry.date)}</Text>
         </View>
+            </TouchableOpacity>
     );
+
+
+const RecentImage: React.FC<{ image: string|null }> = ({ image }) => (
+    image
+        ? <Image source={{ uri: image }} style={extraStyles.image} />
+        : <Image source={require('../../../assets/1493482.jpg')} style={extraStyles.image} />
+);
+
 
     return (
         <View style={styles.container}>
             <Text style={textStyles.h2}>Recent Entries</Text>
-            <View style={recentsPage.row}>
+            {/* <View style={recentsPage.row}> */}
+            <View >
                 {journalEntries.length ? (
                     journalEntries.map((entry, idx) => <RecentBox key={idx} entry={entry} />)
                 ) : (

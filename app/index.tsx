@@ -12,8 +12,12 @@ import { Nullable } from "@aws-amplify/data-schema";
 import { styles } from "../Styles/Styles";
 import { Schema } from "../amplify/data/resource";
 import { useFocusEffect } from "expo-router";
+import { parseAmplifyConfig } from "aws-amplify/utils";
 
-Amplify.configure(outputs);
+
+
+
+Amplify.configure(parseAmplifyConfig(outputs));
 const client = generateClient<Schema>({
   authMode:'userPool'
 })

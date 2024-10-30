@@ -40,6 +40,8 @@ const Calendar: React.FC<CalendarProps> = ({setDate, dates}) => {
                 todayTextStyle={{color:'black'}}
                 selectedDayColor="#333"
                 selectedDayTextColor="#FFFFFF"
+                // dayShape="square"
+                textStyle={{fontSize:19}}
                 customDatesStyles={customDatesStyles}
             />
 

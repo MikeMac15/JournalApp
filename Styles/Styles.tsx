@@ -9,6 +9,7 @@ export const styles = StyleSheet.create({
         height:'100%',
     },
     newEntryButton:{
+        marginVertical:15,
         flexDirection:'row',
         backgroundColor:"#fac8d4",
         width:'100%',
@@ -38,6 +39,20 @@ export const extraStyles = StyleSheet.create({
         shadowOpacity:0.3,
         elevation: 5,
     },
+    shadow2:{
+        shadowOffset:{width:2,height:3},
+        shadowColor:'#111',
+        shadowRadius:2,
+        shadowOpacity:0.7,
+        elevation: 5,
+    },
+    lightshadow2:{
+        shadowOffset:{width:-2,height:-3},
+        shadowColor:'#d9bbb0',
+        shadowRadius:3,
+        shadowOpacity:1,
+        elevation: 5,
+    },
     pinkShadow:{
         shadowOffset:{width:4,height:4},
         shadowColor:"#fac8d4",
@@ -47,9 +62,9 @@ export const extraStyles = StyleSheet.create({
     },
     image: {
         width: 60,
-        height: 100,
+        height: 60,
         margin: 0,
-        borderRadius: 8,
+        borderRadius: 5,
         // borderColor:'white',
         // borderWidth:3
       },
@@ -80,14 +95,24 @@ export const recentsPage = StyleSheet.create({
     title: {
         fontSize:20,
     },
-    box: {
-        backgroundColor:'white',
+    fullbox: {
+        backgroundColor:'whitesmoke',
         justifyContent:'center',
         alignItems:'center',
         marginVertical:10,
-        width:60,
-        height:100,
-        borderWidth:2,
+        padding:10,
+        borderWidth:1,
+        borderRadius:8,
+        borderColor:'whitesmoke'
+    },
+    box: {
+        backgroundColor:'#444',
+        justifyContent:'center',
+        alignItems:'center',
+        // marginVertical:10,
+        width:67,
+        height:67,
+        borderWidth:3.34,
         borderRadius:8,
         borderColor:'whitesmoke'
     },
