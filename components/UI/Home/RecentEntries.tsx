@@ -7,7 +7,7 @@ import { router } from 'expo-router';
 
 interface RecentEntriesProps {
     journalEntries: data;
-    setShowView: React.Dispatch<React.SetStateAction<boolean>>;
+    setShowView: React.Dispatch<React.SetStateAction<number>>;
 }
 type data = {
     date: string;
@@ -30,7 +30,7 @@ const RecentEntries: React.FC<RecentEntriesProps> = ({ journalEntries, setShowVi
             <TouchableOpacity
                 style={[recentsPage.box, extraStyles.shadow]}
                 onPress={() => {
-                    setShowView(true);
+                    setShowView(2);
                 }}
             >
                 {entry.pictures && entry.pictures[0] ? (

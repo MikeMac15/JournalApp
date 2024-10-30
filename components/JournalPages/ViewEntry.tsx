@@ -6,7 +6,7 @@ import { Nullable } from '@aws-amplify/data-schema';
 
 interface viewEntryProps {
   myJournalEntry:Schema["Journal"]["type"]
-  setShowView: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowView: React.Dispatch<React.SetStateAction<number>>;
 }
 
 
@@ -21,7 +21,7 @@ return (<>
             <Text>{myJournalEntry.tags}</Text>
         </View>
         }
-        <Button title='Return Home' onPress={()=>setShowView(false)} />
+        <Button title='Return Home' onPress={()=>setShowView(0)} />
 </>
 )
 

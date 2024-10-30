@@ -19,7 +19,7 @@ interface indexProps {
 const Home: React.FC<indexProps> = ({ }) => {
 
     const [showHome,setShowHome] = useState<boolean>(true);
-    const [showView,setShowView] = useState<boolean>(false);
+    const [showView,setShowView] = useState<number>(0);
     const [date,setDate] = useState<string>('');
 
 
@@ -67,10 +67,10 @@ const Home: React.FC<indexProps> = ({ }) => {
             <NewEntryButton setView={setShowHome}/>
             </>
             :
-            showView == 1
+            showView == 2
             ?
             <>
-                (entryToView ? <ViewEntry myJournalEntry={entryToView} setShowView={setShowView} /> : <Text>No entry selected</Text>)
+                {entryToView ? <ViewEntry myJournalEntry={entryToView} setShowView={setShowView} /> : <Text>No entry selected</Text>}
             </>
             :
                 <NewEntry entryDate={date} setShowHome={setShowHome} />
