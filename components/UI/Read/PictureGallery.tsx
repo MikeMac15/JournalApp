@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { View, Image, FlatList, StyleSheet, Dimensions, Modal, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Image, FlatList, StyleSheet, Dimensions, Modal, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { getPicFromS3 } from '../../API/APIhelpers';
 
 interface PictureGalleryProps {
-  pics: string[];
+  pics: string[]; // Array of S3 keys for the images
 }
 
 const PictureGallery: React.FC<PictureGalleryProps> = ({ pics }) => {
@@ -10,8 +11,25 @@ const PictureGallery: React.FC<PictureGalleryProps> = ({ pics }) => {
   const screenWidth = Dimensions.get('window').width;
   const imageSize = screenWidth / numColumns - 10;
 
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true); // Add loading state
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchImageUrls = async () => {
+      setLoading(true); // Start loading
+      const urls = await Promise.all(pics.map(async (pic) => {
+        const url = await getPicFromS3(pic);
+        return url || ''; // Fallback to empty string if URL retrieval fails
+      }));
+      console.log(urls);
+      setImageUrls(urls); // Set valid URLs only
+      setLoading(false); // Stop loading when images are set
+    };
+
+    fetchImageUrls();
+  }, [pics]);
 
   const openModal = (uri: string) => {
     setSelectedImage(uri);
@@ -34,19 +52,23 @@ const PictureGallery: React.FC<PictureGalleryProps> = ({ pics }) => {
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={pics}
-        renderItem={renderItem}
-        keyExtractor={(item, index) => `${item}-${index}`}
-        numColumns={numColumns}
-      />
+      {loading ? ( // Display loading indicator while loading
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+        <FlatList
+          data={imageUrls}
+          renderItem={renderItem}
+          keyExtractor={(item, index) => `${item}-${index}`}
+          numColumns={numColumns}
+        />
+      )}
 
       {/* Fullscreen Image Modal */}
       <Modal visible={isModalVisible} transparent={true} animationType="fade">
         <View style={styles.modalContainer}>
           <TouchableOpacity style={styles.modalBackground} onPress={closeModal}>
             {selectedImage && (
-              <Image source={{ uri: selectedImage }} style={[styles.fullscreenImage,{width:width,height:height}]} />
+              <Image source={{ uri: selectedImage }} style={[styles.fullscreenImage, { width, height }]} />
             )}
           </TouchableOpacity>
         </View>
@@ -54,6 +76,7 @@ const PictureGallery: React.FC<PictureGalleryProps> = ({ pics }) => {
     </View>
   );
 };
+
 
 export default PictureGallery;
 

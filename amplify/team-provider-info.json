@@ -1,0 +1,24 @@
+{
+  "staging": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-journal-staging-a0196-authRole",
+      "UnauthRoleArn": "arn:aws:iam::361769560403:role/amplify-journal-staging-a0196-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::361769560403:role/amplify-journal-staging-a0196-authRole",
+      "Region": "us-west-2",
+      "DeploymentBucketName": "amplify-journal-staging-a0196-deployment",
+      "UnauthRoleName": "amplify-journal-staging-a0196-unauthRole",
+      "StackName": "amplify-journal-staging-a0196",
+      "StackId": "arn:aws:cloudformation:us-west-2:361769560403:stack/amplify-journal-staging-a0196/1c39c460-97d9-11ef-9136-06cb992f9e25",
+      "AmplifyAppId": "dj4200tt0bpq1"
+    },
+    "categories": {
+      "auth": {
+        "journal29f49398": {},
+        "Journal": {}
+      },
+      "storage": {
+        "s3journalpicturestorage": {}
+      }
+    }
+  }
+}

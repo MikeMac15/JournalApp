@@ -1,88 +1,91 @@
-import { generateClient } from "aws-amplify/api";
+import { uploadData, getUrl } from '@aws-amplify/storage';
+import type { StorageGetUrlOutput } from '@aws-amplify/storage/dist/esm/types';
+import type { Schema } from '../../amplify/data/resource';
+import { generateClient } from "aws-amplify/data";
+import { ItemWithKey, ItemWithPath } from '@aws-amplify/storage/dist/esm/providers/s3/types/outputs';
+import { v4 as uuidv4 } from 'uuid';
 
-import { Schema } from "../../amplify/data/resource";
-import { StorageClass } from "aws-cdk-lib/aws-s3-deployment";
 
 const client = generateClient<Schema>();
 
-// Helper function to upload images to S3 and get their URLs
-const uploadImageToS3 = async (file: File, fileName: string): Promise<string | null> => {
+const uriToBlob = async (uri: string): Promise<Blob> => {
+    const response = await fetch(uri);
+    return response.blob();
+}
+
+export async function uploadPicToS3(uri: string): Promise<ItemWithPath | void> {
     try {
-        // Upload the file to S3
-        const result = await StorageClass.put(fileName, file, {
-            contentType: file.type,
-        });
-
-        // Get the public URL of the uploaded file
-        const url = await Storage.get(result.key);
-        return url;
+        const blob = await uriToBlob(uri);
+        const result = await uploadData({
+            path: `picture-submissions/${uri}`,
+            data: blob,
+            options: {
+                contentType: 'image/jpeg',
+            },
+        }).result;
+        if (result){
+            console.log('Upload succeeded:', result);
+            return result;
+        }
     } catch (error) {
-        console.error("Error uploading file to S3:", error);
-        return null;
+        console.error('Upload error:', error);
     }
-};
+}
 
-// Main function to create a journal entry with photos
-export const createJournalEntryWithPhotos = async ({
-    entryDate,
+export async function bulkUploadPicsToS3(uris: string[]): Promise<ItemWithPath[] | void> {
+    try {
+        const results = await Promise.all(uris.map(uri => uploadPicToS3(uri)));
+        const filteredResults = results.filter((item): item is ItemWithPath => item !== undefined);
+        console.log('Bulk upload succeeded:', filteredResults);
+        return filteredResults;
+    } catch (error) {
+        console.error('Bulk upload error:', error);
+    }
+}
+
+
+export async function getPicFromS3(filePath: string): Promise<string> {
+    try {
+        const result: StorageGetUrlOutput = await getUrl({
+            path: filePath,
+        });
+        console.log('URL retrieval succeeded:', result);
+        return String(result.url); // Convert the URL to a plain string
+    } catch (error) {
+        console.error('URL retrieval error:', error);
+        return ''; // Return an empty string on error
+    }
+}
+
+
+export async function createJournalPostWithPictures({
+    date,
     location,
-    journalText,
-    summaryText,
+    message,
+    summary,
     tags,
-    photoFiles,
+    pictures,
 }: {
-    entryDate: string;
-    location?: string;
-    journalText: string;
-    summaryText: string;
-    tags?: string[];
-    photoFiles?: File[];
-}) => {
+    date: string;
+    location: string;
+    message: string;
+    summary: string;
+    tags: string[];
+    pictures: string[];
+}): Promise<void> {
     try {
-        // Step 1: Upload photos to S3 and gather URLs
-        const photoUrls = await Promise.all(
-            (photoFiles || []).map(async (file, index) => {
-                const fileName = `journal-images/${entryDate}-${index}-${file.name}`;
-                return await uploadImageToS3(file, fileName);
-            })
-        );
+        const picturePaths = await bulkUploadPicsToS3(pictures) || [];
 
-        // Filter out any null URLs (in case any uploads failed)
-        const validPhotoUrls = photoUrls.filter((url): url is string => url !== null);
-
-        // Step 2: Create the journal entry in DynamoDB with photo URLs
-        const { errors, data: newMessage } = await client.models.Journal.create({
-            date: entryDate,
-            location: location,
-            message: journalText,
-            summary: summaryText,
-            tags: tags,
-            pictures: validPhotoUrls, // Store the S3 URLs in the journal entry
+        await client.models.Journal.create({
+            date,
+            location,
+            message,
+            summary,
+            tags,
+            pictures: picturePaths.map(item => item?.path || ''),
         });
-
-        if (errors) {
-            console.error("Failed to create journal entry:", errors);
-        } else {
-            console.log("Journal entry created successfully with images:", newMessage);
-        }
+        console.log('Journal post created successfully');
     } catch (error) {
-        console.error("An error occurred while creating the journal entry with photos:", error);
+        console.error('Error creating journal post:', error);
     }
-};
-
-// Function to delete a journal entry
-export const deleteJournalEntry = async (entryId: string) => {
-    try {
-        const { errors, data: deletedMessage } = await client.models.Journal.delete({
-            id: entryId,
-        });
-
-        if (errors) {
-            console.error("Failed to delete journal entry:", errors);
-        } else {
-            console.log("Journal entry deleted successfully:", deletedMessage);
-        }
-    } catch (error) {
-        console.error("An error occurred while deleting the journal entry:", error);
-    }
-};
+}

@@ -1,0 +1,12 @@
+{
+  "resourceName": "s3journalpicturestorage",
+  "bucketName": "journal-picture-storage",
+  "policyUUID": "0b929a23",
+  "storageAccess": "auth",
+  "guestAccess": [],
+  "authAccess": [
+    "CREATE_AND_UPDATE",
+    "READ",
+    "DELETE"
+  ]
+}
